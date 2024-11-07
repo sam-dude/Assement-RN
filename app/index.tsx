@@ -180,11 +180,27 @@ export default function Index({ navigation }) {
               setOnDate(false);
             }}
           />
-        </View>
-        
-        {/* Rest of your time selection UI */}
+        </View>        
       </View>
     );
+  };
+
+  const isFormComplete = () => {
+    // Check if service is selected and location details are complete
+    const baseConditions = service && isLocationDetailsComplete();
+    
+    if (!baseConditions) return false;
+  
+    // Neither date nor flexible is selected
+    if (!onDate && !flexible) return false;
+  
+    // If "On date" is selected but no date is chosen
+    if (onDate && !selectedDate) return false;
+  
+    // If flexible is selected, allow continuation
+    if (flexible) return true;
+  
+    return true;
   };
 
   return (
@@ -318,16 +334,21 @@ export default function Index({ navigation }) {
         </View>
        {/* Continue Button */}
        <View style={styles.buttonContainer}>
-          <Pressable
-            style={[
-              styles.nextButton,
-              (!isLocationDetailsComplete() || !service) && styles.nextButtonDisabled
-            ]}
-            onPress={() => {}}
-            disabled={!isLocationDetailsComplete() || !service}
-          >
-            <Text style={styles.nextButtonText}>Continue</Text>
-          </Pressable>
+        <Pressable
+          style={[
+            styles.nextButton,
+            !isFormComplete() && styles.nextButtonDisabled
+          ]}
+          onPress={() => {}}
+          disabled={!isFormComplete()}
+        >
+          <Text style={[
+            styles.nextButtonText,
+            !isFormComplete() && styles.nextButtonTextDisabled
+          ]}>
+            Continue
+          </Text>
+        </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -422,6 +443,9 @@ const styles = StyleSheet.create({
     paddingBottom: 20
   },
   nextButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#80bb9f',
+  },
+  nextButtonTextDisabled: {
+    opacity: 0.7,
   }
 });
