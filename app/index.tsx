@@ -101,21 +101,107 @@ export default function Index({ navigation }) {
   // Add a single state variable for selected time
   const [selectedTime, setSelectedTime] = useState<TimeSlot>(null)
 
+  const isLocationDetailsComplete = () => {
+    if (service === 'residential') {
+      return selectedValue && street && closestBusStop && landMarks;
+    }
+    return true; // For remote service
+  };
 
+  const renderLocationDetails = () => {
+    if (service !== 'residential') return null;
+
+    return (
+      <View style={styles.locationDetails}>
+        <Text style={{fontSize: 16}}>Where do you want the task done?</Text>
+        
+        <CustomDropdown
+          value={selectedValue}
+          onChange={setSelectedValue}
+          search={true}
+          placeholder="Local government"
+        />
+
+        {selectedValue && (
+          <CustomTextInput
+            placeholder="House address"
+            value={street}
+            onChangeText={setStreet}
+            containerStyle={{ marginBottom: 8 }}
+            inputStyle={{ backgroundColor: '#f5f5f5' }}
+          />
+        )}
+
+        {selectedValue && street && (
+          <CustomTextInput
+            placeholder="Closest bus stop"
+            value={closestBusStop}
+            onChangeText={setClosestBusStop}
+            containerStyle={{ marginBottom: 8 }}
+            inputStyle={{ backgroundColor: '#f5f5f5' }}
+          />
+        )}
+
+        {selectedValue && street && closestBusStop && (
+          <CustomTextInput
+            placeholder="Landmarks"
+            value={landMarks}
+            onChangeText={setLandMarks}
+            containerStyle={{ marginBottom: 8 }}
+            inputStyle={{ backgroundColor: '#f5f5f5' }}
+          />
+        )}
+      </View>
+    );
+  };
+
+  const renderTimeOptions = () => {
+    if (!service || (service === 'residential' && !isLocationDetailsComplete())) {
+      return null;
+    }
+
+    return (
+      <View>
+        <Text style={{fontSize: 16}}>When do you need this done?</Text>
+        <View style={styles.timeOptionsContainer}>
+          <OptionWithCheckbox
+            title="On date"
+            isSelected={onDate}
+            onSelect={() => {
+              setOnDate(!onDate);
+              setFlexible(false);
+            }}
+          />
+          <OptionWithCheckbox
+            title="Flexible"
+            isSelected={flexible}
+            onSelect={() => {
+              setFlexible(!flexible);
+              setOnDate(false);
+            }}
+          />
+        </View>
+        
+        {/* Rest of your time selection UI */}
+      </View>
+    );
+  };
 
   return (
     <KeyboardAvoidingView 
-      style={{ flex: 1 }} 
+      style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
       <StatusBar style="dark" />
       <ScrollView 
-        style={styles.container}
+        style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         keyboardShouldPersistTaps="handled"
+        bounces={false}
       >
+        <View style={{flex: 1}}>
         <Text style={styles.heading}>Location & Date</Text>
         <Text style={styles.subheading}>Select the category that best fits your needs</Text>
         
@@ -136,77 +222,11 @@ export default function Index({ navigation }) {
           />
         </View>
 
-        {/* residential service more options */}
-        {service === "residential" && (
-          <View>
-            {/* location details */}
-            <View style={styles.locationDetails}>
-              <Text style={{fontSize: 16}}>Where do you want the task done?</Text>
-              <CustomDropdown
-                value={selectedValue}
-                onChange={setSelectedValue}
-                search={true}
-                placeholder="Local government"
-              />
-              {/* street */}
-              <CustomTextInput
-                placeholder="House address"
-                value={street}
-                onChangeText={setStreet}
-                containerStyle={{ marginBottom: 8 }}
-                inputStyle={{ backgroundColor: '#f5f5f5' }}
-              />
-              {/* closest bus-stop */}
-              <CustomTextInput
-                placeholder="Closest bus stop"
-                value={closestBusStop}
-                onChangeText={setClosestBusStop}
-                containerStyle={{ marginBottom: 8 }}
-                inputStyle={{ backgroundColor: '#f5f5f5' }}
-              />
-              {/* landmarks */}
-              <CustomTextInput
-                placeholder="Landmarks"
-                value={landMarks}
-                onChangeText={setLandMarks}
-                containerStyle={{ marginBottom: 8 }}
-                inputStyle={{ backgroundColor: '#f5f5f5' }}
-              />
-            </View>
-          </View>
-        )}
+        {/* Location Details */}
+        {renderLocationDetails()}
 
-        {/* time option for both */}
-        {
-          service && (
-            <View>
-              <Text style={{fontSize: 16}}>When do you need this done?</Text>
-              <View style={{
-                flexDirection: "row",
-                gap: 13,
-                paddingVertical: 10,
-                paddingBottom: 20
-              }}>
-                <OptionWithCheckbox
-                  title="On date"
-                  isSelected={onDate}
-                  onSelect={() => {
-                    setOnDate(!onDate)
-                    setFlexible(false)
-                  }}
-                />
-                <OptionWithCheckbox
-                  title="Flexible"
-                  isSelected={flexible}
-                  onSelect={() => {
-                    setFlexible(!flexible)
-                    setOnDate(false)
-                  }}
-                />
-              </View>
-            </View>
-          )
-        }
+        {/* Time Options */}
+        {renderTimeOptions()}
 
         {/* certain date */}
         {onDate && (
@@ -295,6 +315,20 @@ export default function Index({ navigation }) {
           />
         </>
       )}
+        </View>
+       {/* Continue Button */}
+       <View style={styles.buttonContainer}>
+          <Pressable
+            style={[
+              styles.nextButton,
+              (!isLocationDetailsComplete() || !service) && styles.nextButtonDisabled
+            ]}
+            onPress={() => {}}
+            disabled={!isLocationDetailsComplete() || !service}
+          >
+            <Text style={styles.nextButtonText}>Continue</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -305,10 +339,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  scrollView: {
+    flex: 1,
+  },
   contentContainer: {
+    flexGrow: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 32,
+    paddingBottom: Platform.OS === 'ios' ? 53 : 33, // Extra padding for button
   },
   heading: {
     fontSize: 24,
@@ -350,13 +388,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
   },
+  buttonContainer: {
+    paddingTop: 33,
+    backgroundColor: '#fff',
+  },
   nextButton: {
     backgroundColor: "#00763E",
     padding: 16,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: "auto",
-    marginBottom: 32,
   },
   nextButtonText: {
     color: "#fff",
@@ -374,5 +414,14 @@ const styles = StyleSheet.create({
     paddingRight: 32,
     flexDirection: "row",
     alignItems: "center",
+  },
+  timeOptionsContainer: {
+    flexDirection: "row",
+    gap: 13,
+    paddingVertical: 10,
+    paddingBottom: 20
+  },
+  nextButtonDisabled: {
+    backgroundColor: '#ccc',
   }
 });
