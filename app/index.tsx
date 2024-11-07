@@ -177,34 +177,36 @@ export default function Index({ navigation }) {
         )}
 
         {/* time option for both */}
-        <View>
-          <Text style={{fontSize: 16}}>When do you need this done?</Text>
-          <View style={{
-            flexDirection: "row",
-            gap: 13,
-            paddingVertical: 10,
-            paddingBottom: 20
-          }}>
-            <OptionWithCheckbox
-              title="On date"
-              isSelected={onDate}
-              onSelect={() => {
-                setOnDate(!onDate)
-                setFlexible(false)
-              }}
-            />
-            <OptionWithCheckbox
-              title="Flexible"
-              isSelected={flexible}
-              onSelect={() => {
-                setFlexible(!flexible)
-                setOnDate(false)
-              }}
-            />
-          </View>
-        </View>
-
-       
+        {
+          service && (
+            <View>
+              <Text style={{fontSize: 16}}>When do you need this done?</Text>
+              <View style={{
+                flexDirection: "row",
+                gap: 13,
+                paddingVertical: 10,
+                paddingBottom: 20
+              }}>
+                <OptionWithCheckbox
+                  title="On date"
+                  isSelected={onDate}
+                  onSelect={() => {
+                    setOnDate(!onDate)
+                    setFlexible(false)
+                  }}
+                />
+                <OptionWithCheckbox
+                  title="Flexible"
+                  isSelected={flexible}
+                  onSelect={() => {
+                    setFlexible(!flexible)
+                    setOnDate(false)
+                  }}
+                />
+              </View>
+            </View>
+          )
+        }
 
         {/* certain date */}
         {onDate && (
