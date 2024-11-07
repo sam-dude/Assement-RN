@@ -3,16 +3,18 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 const DayCard = ({ Icon, title, isSelected, onSelect, timeRange }) => {
     return(
     <Pressable 
-        onPress={onSelect}
-        style={({ pressed }) => [
-            styles.dayCard,
-            isSelected ? styles.dayCardActive : styles.dayCardInactive,
-            pressed && styles.pressed
-        ]}
-    >
-        <View style={styles.icon}>
-            <Icon />
-        </View>
+    onPress={onSelect}
+    style={({ pressed }) => [
+        styles.dayCard,
+        isSelected ? styles.dayCardActive : styles.dayCardInactive,
+        pressed && styles.pressed
+    ]}
+>
+    <View style={[
+        styles.icon,
+    ]}>
+        <Icon fill={isSelected ? "#00763E" : "#666"} />
+    </View>
         <Text style={[
             styles.cardTitle,
             { color: isSelected ? "#fff" : "#000" }

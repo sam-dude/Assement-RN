@@ -16,6 +16,7 @@ import { Icon } from "@/components/icon";
 import DayCard from "@/components/DayCard";
 
 type ServiceType = 'residential' | 'remote' | null;
+type TimeSlot = 'morning' | 'afternoon' | 'evening' | 'night' | null;
 
 type ServiceCardProps = {
   title: string;
@@ -89,186 +90,176 @@ export default function Index({ navigation }) {
   const [isCertainDate, setIsCertainDate] = useState(false);
 
   // day type
-  const [morning, setMorning] = useState(false);
-  const [afternoon, setAfternoon] = useState(false);
-  const [evening, setEvening] = useState(false);
-  const [night, setNight] = useState(false);
+  // Add a single state variable for selected time
+  const [selectedTime, setSelectedTime] = useState<TimeSlot>(null)
 
-  const handleNext = () => {
-    if (service) {
-      navigation.navigate('NextScreen', { service });
-    }
-  };
+
 
   return (
     <KeyboardAvoidingView 
-    style={{ flex: 1 }} 
-    behavior={Platform.OS === "ios" ? "padding" : "height"}
-    keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
-  >
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
-      <Text style={styles.heading}>Location & Date</Text>
-      <Text style={styles.subheading}>Select the category that best fits your needs</Text>
-      
-      <View style={styles.servicesContainer}>
-        <ServiceCard
-          title="Residential Service"
-          description="Select this if you need the task done at a particular location of your choice"
-          type="residential"
-          isSelected={service === "residential"}
-          onSelect={() => setService("residential")}
-        />
-        <ServiceCard
-          title="Remote Service"
-          description="Select this if you need the task done remotely"
-          type="remote"
-          isSelected={service === "remote"}
-          onSelect={() => setService("remote")}
-        />
-      </View>
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.heading}>Location & Date</Text>
+        <Text style={styles.subheading}>Select the category that best fits your needs</Text>
+        
+        <View style={styles.servicesContainer}>
+          <ServiceCard
+            title="Residential Service"
+            description="Select this if you need the task done at a particular location of your choice"
+            type="residential"
+            isSelected={service === "residential"}
+            onSelect={() => setService("residential")}
+          />
+          <ServiceCard
+            title="Remote Service"
+            description="Select this if you need the task done remotely"
+            type="remote"
+            isSelected={service === "remote"}
+            onSelect={() => setService("remote")}
+          />
+        </View>
 
-      {/* residential service more options */}
-      {service === "residential" && (
+        {/* residential service more options */}
+        {service === "residential" && (
+          <View>
+            {/* location details */}
+            <View style={styles.locationDetails}>
+              <Text style={{fontSize: 16}}>Where do you want the task done?</Text>
+              <CustomDropdown
+                data={[
+                  { label: 'Select location', value: null },
+                  { label: 'Item 1', value: '1' },
+                  { label: 'Item 2', value: '2' },
+                ]}
+                value={selectedValue}
+                onChange={setSelectedValue}
+                search={true}
+                placeholder="Local government"
+              />
+              {/* street */}
+              <CustomTextInput
+                placeholder="House address"
+                value={street}
+                onChangeText={setStreet}
+                containerStyle={{ marginBottom: 8 }}
+                inputStyle={{ backgroundColor: '#f5f5f5' }}
+              />
+              {/* closest bus-stop */}
+              <CustomTextInput
+                placeholder="Closest bus stop"
+                value={closestBusStop}
+                onChangeText={setClosestBusStop}
+                containerStyle={{ marginBottom: 8 }}
+                inputStyle={{ backgroundColor: '#f5f5f5' }}
+              />
+              {/* landmarks */}
+              <CustomTextInput
+                placeholder="Landmarks"
+                value={landMarks}
+                onChangeText={setLandMarks}
+                containerStyle={{ marginBottom: 8 }}
+                inputStyle={{ backgroundColor: '#f5f5f5' }}
+              />
+            </View>
+          </View>
+        )}
+
+        {/* time option for both */}
         <View>
-          {/* location details */}
-          <View style={styles.locationDetails}>
-            <Text style={{fontSize: 16}}>Where do you want the task done?</Text>
-            <CustomDropdown
-              data={[
-                { label: 'Select location', value: null },
-                { label: 'Item 1', value: '1' },
-                { label: 'Item 2', value: '2' },
-              ]}
-              value={selectedValue}
-              onChange={setSelectedValue}
-              search={true}
-              placeholder="Local government"
+          <Text style={{fontSize: 16}}>When do you need this done?</Text>
+          <View style={{
+            flexDirection: "row",
+            gap: 13,
+            paddingVertical: 10,
+            paddingBottom: 20
+          }}>
+            <OptionWithCheckbox
+              title="On date"
+              isSelected={onDate}
+              onSelect={() => {
+                setOnDate(!onDate)
+                setFlexible(false)
+              }}
             />
-            {/* street */}
-            <CustomTextInput
-              placeholder="House address"
-              value={street}
-              onChangeText={setStreet}
-              containerStyle={{ marginBottom: 8 }}
-              inputStyle={{ backgroundColor: '#f5f5f5' }}
-            />
-            {/* closest bus-stop */}
-            <CustomTextInput
-              placeholder="Closest bus stop"
-              value={closestBusStop}
-              onChangeText={setClosestBusStop}
-              containerStyle={{ marginBottom: 8 }}
-              inputStyle={{ backgroundColor: '#f5f5f5' }}
-            />
-            {/* landmarks */}
-            <CustomTextInput
-              placeholder="Landmarks"
-              value={landMarks}
-              onChangeText={setLandMarks}
-              containerStyle={{ marginBottom: 8 }}
-              inputStyle={{ backgroundColor: '#f5f5f5' }}
+            <OptionWithCheckbox
+              title="Flexible"
+              isSelected={flexible}
+              onSelect={() => {
+                setFlexible(!flexible)
+                setOnDate(false)
+              }}
             />
           </View>
         </View>
+
+        {/* certain date */}
+        {onDate || flexible ? (
+          <View
+            style={{
+              marginBottom: 20,
+              flexDirection: "row",
+              gap: 8,
+            }}
+            onTouchEnd={() => setIsCertainDate(!isCertainDate)}
+          >
+            <Checkbox
+              value={isCertainDate}
+              onValueChange={setIsCertainDate}
+            />
+            <Text style={{fontSize: 14}}>I need a certain time of day</Text>
+          </View>
+        ): null}
+
+        
+      {(onDate || flexible) && isCertainDate && (
+        <>
+          <DayCard
+            Icon={(props) => <Icon.MorningIcon {...props} />}
+            title="Morning"
+            isSelected={selectedTime === 'morning'}
+            onSelect={() =>
+              setSelectedTime(selectedTime === 'morning' ? null : 'morning')
+            }
+            timeRange="7:00am to 11:59am"
+          />
+          <DayCard
+            Icon={(props) => <Icon.AfternoonIcon {...props} />}
+            title="Afternoon"
+            isSelected={selectedTime === 'afternoon'}
+            onSelect={() =>
+              setSelectedTime(selectedTime === 'afternoon' ? null : 'afternoon')
+            }
+            timeRange="12:00pm to 4:59pm"
+          />
+          <DayCard
+            Icon={(props) => <Icon.NightIcon {...props} />}
+            title="Evening"
+            isSelected={selectedTime === 'evening'}
+            onSelect={() =>
+              setSelectedTime(selectedTime === 'evening' ? null : 'evening')
+            }
+            timeRange="5:00pm to 9:59pm"
+          />
+          <DayCard
+            Icon={(props) => <Icon.EveningIcon {...props} />}
+            title="All Day"
+            isSelected={selectedTime === 'night'}
+            onSelect={() =>
+              setSelectedTime(selectedTime === 'night' ? null : 'night')
+            }
+            timeRange="7:00am to 9:59pm"
+          />
+        </>
       )}
-
-      {/* time option for both */}
-      <View>
-        <Text style={{fontSize: 16}}>When do you need this done?</Text>
-        <View style={{
-          flexDirection: "row",
-          gap: 13,
-          paddingVertical: 10,
-          paddingBottom: 20
-        }}>
-          <OptionWithCheckbox
-            title="On date"
-            isSelected={onDate}
-            onSelect={() => {
-              setOnDate(!onDate)
-              setFlexible(false)
-            }}
-          />
-          <OptionWithCheckbox
-            title="Flexible"
-            isSelected={flexible}
-            onSelect={() => {
-              setFlexible(!flexible)
-              setOnDate(false)
-            }}
-          />
-        </View>
-      </View>
-
-      {/* certain date */}
-      {onDate || flexible ? (
-        <View
-          style={{
-            marginBottom: 20,
-            flexDirection: "row",
-            gap: 8,
-          }}
-          onTouchEnd={() => setIsCertainDate(!isCertainDate)}
-        >
-          <Checkbox
-            value={isCertainDate}
-            onValueChange={setIsCertainDate}
-          />
-          <Text style={{fontSize: 14}}>I need a certain time of day</Text>
-        </View>
-      ): null}
-
-      {/* flexible date */}
-
-      {/* {(
-        <Pressable 
-          style={styles.nextButton}
-        >
-          <Text style={styles.nextButtonText}>Continue</Text>
-        </Pressable>
-      )} */}
-
-      
-      {
-        onDate || flexible ? isCertainDate && (
-          <>
-            <DayCard
-              Icon={() => Icon.MorningIcon( isCertainDate ? {fill: 'red'} : {})}
-              title="Morning"
-              isSelected={morning}
-              onSelect={() => setMorning(!morning)}
-              timeRange="8:00am - 12:00pm"
-            />
-            <DayCard
-              Icon={() => Icon.AfternoonIcon( isCertainDate ? {fill: 'red'} : {})}
-              title="Afternoon"
-              isSelected={afternoon}
-              onSelect={() => setAfternoon(!afternoon)}
-              timeRange="12:00pm - 4:00pm"
-            />
-            <DayCard
-              Icon={() => Icon.EveningIcon( isCertainDate ? {fill: 'red'} : {})}
-              title="Evening"
-              isSelected={evening}
-              onSelect={() => setEvening(!evening)}
-              timeRange="4:00pm - 8:00pm"
-            />
-            <DayCard
-              Icon={() => Icon.NightIcon( isCertainDate ? {fill: 'red'} : {})}
-              title="Night"
-              isSelected={night}
-              onSelect={() => setNight(!night)}
-              timeRange="8:00pm - 12:00am"
-            />
-          </>
-        ) : null
-      }
-     </ScrollView>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -280,7 +271,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 20,
-    paddingTop: 56,
+    paddingTop: 20,
     paddingBottom: 32,
   },
   heading: {

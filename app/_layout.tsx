@@ -7,7 +7,6 @@ export default function RootLayout() {
     <SafeAreaView style={{
       flex: 1,
     }}>
-      <StatusBar style="dark" />
       <Stack>
         <Stack.Screen
           name="index" 
