@@ -12,8 +12,9 @@ import {
   KeyboardAvoidingView, 
   Platform
 } from "react-native";
-import { Icon } from "@/components/icon";
+import { Icons } from "@/components/icon";
 import DayCard from "@/components/DayCard";
+import DatePickerComponent from "@/components/DatePickerComponent";
 
 type ServiceType = 'residential' | 'remote' | null;
 type TimeSlot = 'morning' | 'afternoon' | 'evening' | 'night' | null;
@@ -35,6 +36,13 @@ const ServiceCard = ({ title, description, isSelected, onSelect }: ServiceCardPr
       pressed && styles.pressed
     ]}
   >
+    <View style={{
+      marginBottom: 15,
+    }}>
+      {
+        isSelected ? (<Icons.ActiveRadioIcon />) : (<Icons.InactiveRadioIcon />)
+      }
+    </View>
     <Text style={[
       styles.cardTitle,
       { color: isSelected ? "#fff" : "#000" }
@@ -86,10 +94,10 @@ export default function Index({ navigation }) {
   const [landMarks, setLandMarks] = useState('')
 
   const [onDate, setOnDate] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [flexible, setFlexible] = useState(false);
   const [isCertainDate, setIsCertainDate] = useState(false);
 
-  // day type
   // Add a single state variable for selected time
   const [selectedTime, setSelectedTime] = useState<TimeSlot>(null)
 
@@ -101,6 +109,7 @@ export default function Index({ navigation }) {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
+      <StatusBar style="dark" />
       <ScrollView 
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
@@ -134,11 +143,6 @@ export default function Index({ navigation }) {
             <View style={styles.locationDetails}>
               <Text style={{fontSize: 16}}>Where do you want the task done?</Text>
               <CustomDropdown
-                data={[
-                  { label: 'Select location', value: null },
-                  { label: 'Item 1', value: '1' },
-                  { label: 'Item 2', value: '2' },
-                ]}
                 value={selectedValue}
                 onChange={setSelectedValue}
                 search={true}
@@ -200,8 +204,38 @@ export default function Index({ navigation }) {
           </View>
         </View>
 
+       
+
         {/* certain date */}
-        {onDate || flexible ? (
+        {onDate && (
+          <View>
+            <DatePickerComponent
+              value={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              placeholder="Select a Date"
+            />
+
+            {selectedDate && (
+              <Pressable
+                style={{
+                  marginBottom: 20,
+                  flexDirection: "row",
+                  gap: 8,
+                  marginTop: 20
+                }}
+                onPress={() => setIsCertainDate(!isCertainDate)}
+              >
+                <Checkbox
+                  value={isCertainDate}
+                  onValueChange={setIsCertainDate}
+                />
+                <Text style={{ fontSize: 14 }}>I need a certain time of day</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+        {/* flexible */}
+        { flexible ? (
           <View
             style={{
               marginBottom: 20,
@@ -222,7 +256,7 @@ export default function Index({ navigation }) {
       {(onDate || flexible) && isCertainDate && (
         <>
           <DayCard
-            Icon={(props) => <Icon.MorningIcon {...props} />}
+            Icon={(props) => <Icons.MorningIcon {...props} />}
             title="Morning"
             isSelected={selectedTime === 'morning'}
             onSelect={() =>
@@ -231,7 +265,7 @@ export default function Index({ navigation }) {
             timeRange="7:00am to 11:59am"
           />
           <DayCard
-            Icon={(props) => <Icon.AfternoonIcon {...props} />}
+            Icon={(props) => <Icons.AfternoonIcon {...props} />}
             title="Afternoon"
             isSelected={selectedTime === 'afternoon'}
             onSelect={() =>
@@ -240,7 +274,7 @@ export default function Index({ navigation }) {
             timeRange="12:00pm to 4:59pm"
           />
           <DayCard
-            Icon={(props) => <Icon.NightIcon {...props} />}
+            Icon={(props) => <Icons.NightIcon {...props} />}
             title="Evening"
             isSelected={selectedTime === 'evening'}
             onSelect={() =>
@@ -249,7 +283,7 @@ export default function Index({ navigation }) {
             timeRange="5:00pm to 9:59pm"
           />
           <DayCard
-            Icon={(props) => <Icon.EveningIcon {...props} />}
+            Icon={(props) => <Icons.EveningIcon {...props} />}
             title="All Day"
             isSelected={selectedTime === 'night'}
             onSelect={() =>
@@ -287,9 +321,11 @@ const styles = StyleSheet.create({
   servicesContainer: {
     flexDirection: "row",
     gap: 12,
+    marginBottom: 20,
   },
   serviceCard: {
-    padding: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
     borderRadius: 12,
     flex: 1,
   },
@@ -326,7 +362,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   locationDetails: {
-    marginVertical: 20,
+    marginBottom: 20,
   },
   optionWithCheckBox: {
     backgroundColor: "#f5f5f5",

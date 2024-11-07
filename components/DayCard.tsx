@@ -1,33 +1,44 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Icons } from "./icon";
 
 const DayCard = ({ Icon, title, isSelected, onSelect, timeRange }) => {
     return(
     <Pressable 
-    onPress={onSelect}
-    style={({ pressed }) => [
-        styles.dayCard,
-        isSelected ? styles.dayCardActive : styles.dayCardInactive,
-        pressed && styles.pressed
-    ]}
->
-    <View style={[
-        styles.icon,
-    ]}>
-        <Icon fill={isSelected ? "#00763E" : "#666"} />
-    </View>
-        <Text style={[
-            styles.cardTitle,
-            { color: isSelected ? "#fff" : "#000" }
+        onPress={onSelect}
+        style={({ pressed }) => [
+            styles.dayCard,
+            isSelected ? styles.dayCardActive : styles.dayCardInactive,
+            pressed && styles.pressed
+        ]}
+    >
+        <View style={[
+            styles.icon,
         ]}>
-        {title}
-        </Text>
-        <Text style={[
-            styles.cardDescription,
-            { color: isSelected ? "#fff" : "#000" }
-        ]}>
-        The time range is 
-        <Text style={{fontWeight: "bold"}}> {timeRange}</Text>
-        </Text>
+            <Icon fill={isSelected ? "#00763E" : "#666"} />
+        </View>
+       <View style={{
+        flexDirection: "row",
+        alignItems: "center",
+       }}>
+        <View style={{flex: 1}}>
+            <Text style={[
+                styles.cardTitle,
+                { color: isSelected ? "#fff" : "#000" }
+            ]}>
+                {title}
+            </Text>
+            <Text style={[
+                styles.cardDescription,
+                { color: isSelected ? "#fff" : "#000" }
+            ]}>
+                The time range is 
+                <Text style={{fontWeight: "bold"}}> {timeRange}</Text>
+            </Text>
+        </View>
+            {
+                isSelected ? (<Icons.ActiveRadioIcon />) : (<Icons.InactiveRadioIcon />)
+            }
+       </View>
     </Pressable>
     );
 }
